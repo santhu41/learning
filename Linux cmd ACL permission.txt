@@ -1,0 +1,56 @@
+I have user whose is owner of the file and he is normal user
+
+Example : directory structure
+
+
+
+
+Ceipal is parent directory 
+
+Sub directories are test1, test2,test3
+We have one directory and one file in test1 directory
+
+
+The test2 directory has only one directory test3
+
+
+The test3 directory has one text file in it
+ 
+
+We have one user sai123 and we are setting these user to access only up to test1 directory
+
+Executing below cmd
+
+setfacl -m u:sai123:r /home/ceipal/Ceipal/test1/*
+
+
+
+But challenges here are : 
+
+1) The user with that read permission can only read files in test1 directory.
+2) Cannot access the next directory from here as we have given on read permission as the directory needs execute permission too to access.
+
+
+To overcome this : 
+
+1) We need to execute below command with execute permission too 
+2) so that he can access the next directory and can only read files in the next directory.
+
+Cmd : setfacl -m u:sai123:rx /home/ceipal/Ceipal/test1/*
+
+
+
+After executing the above cmd now the user can access the next directory too. 
+
+When  referring to a tree diagram.
+
+We have a file and directory in test1 directory and now we have given execute permission so users can access the next directory too and read files in that directory but can not access next directory from here.
+
+
+
+
+
+
+
+
+

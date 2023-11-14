@@ -1,0 +1,174 @@
+jenkins
+
+curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee \
+  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+  
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+  https://pkg.jenkins.io/debian binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+  
+  
+  
+sudo apt-get update
+
+sudo apt-get install jenkins
+
+
+Adding separate volume group to jenkins so that it won't depend on the existing host
+Uses: 
+
+If the host server is crashed and unable to recover then we can take these volume group and attach these volume groups to any other host and work as usual.
+
+Adding the new volume : 
+
+1) Go to your cloud console and create a volume in the same zone .
+2) Now as per the requirement of your needs create the new volume with required size etc.
+3) Now attach these created volumes to the server in which Jenkins is installed.
+4)  Check the attached volume with these cmd fdisk -l
+5) Now making of that disk 
+mkfs.ext4   device_name ( path like /dev/xvdf)
+And press enter
+
+6) When ever we are installing  jenkins it will default created dir in below mentioned paths
+  Create these path to attach the created volume to it 
+ mkdir -p /var/lib/jenkins
+7) Now  add these above path in fstab 
+Vi /etc/fstab
+Add this line fstab file  device_name  path_to_attach type defaults 0 0   (example : - /dev/xvdf  /var/lib/jenkins ext4 defaults 0 0 )
+Now save this file and next mount this point.
+8) mount  /var/lib/jenkins
+9) Now to check whether the created volume is added check with below cmd and will see the newly created volume is added. Cmd :  df -h
+10) Now when we install jenkins in this particular host it will take these path as default
+
+
+Jenkins with nginx reverse  proxy 
+
+1) Change the config file in the below path location
+
+etc/nginx/nginx.conf
+Remove or comment all the stuff with the listening and etc
+
+2) And add new configuration in Config.d directory as jenkins.config
+upstream jenkins {
+         server 127.0.01:8080;
+}
+server  {
+    listen  80 default;
+    server_name santhu;
+
+    access_log   /var/log/nginx/jenkins.access.log;
+    error_log     /var/log/nginx/jenkins.error.log;
+
+    proxy_buffers 16 64k;
+    proxy_buffer_size  128k;
+
+    location  /  {
+         proxy_pass http://jenkins;
+         proxy_next_upstream error timeout invaild_header http_500 htpp_502 http_503 http_504;
+         proxy_redirect off;
+         proxy_set_header Host $http_host;
+         proxy_set_header X-Real-IP $remote_addr;
+         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+         proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+                  }
+  
+
+When we added these in new configuration file we no need to give server ip and default port 8080
+It will work as organization_name/jenkins and it will run on port 80 with reverse proxy.
+
+
+When are getting as permission denied  like "502" or any bad gateway error  on browsing the jenkins site using below url
+
+http://organization_name/jenkins.
+ For redhat box:
+ getenforce
+Setenforce permissive 
+Then now restart the service of nginx and try to browse it will be available now..
+
+
+
+
+How to append a local dns on your system??
+
+Execute below command and see whether lines are updated in etc/hosts file are not
+
+echo "127.0.0.1 santhu.com www.santhu.com" | sudo tee -a /etc/hosts >/dev/null
+
+
+
+
+Here I have given dns for localhost so when typing the same on it by default jenkins is running on it , So we are able to see jenkins working with dns.
+
+
+
+
+
+
+
+
+
+High availability of jenkins 
+
+setup jenkins
+
+Here the haproxy servers to server based on the traffic
+
+the one master node will be active and other one will be passive based on the traffic haproxy will connect to the another master node
+
+
+we need to launch 3 servers
+
+1) HAproxy -1
+2) Master nodes -2
+
+we need to install jenkins on the both master node servers 
+
+Steps: - 
+1) go to jenkins console of master node-1 and click on manage jenkins
+2) Now click on the credentials and then select global one
+
+
+3) Select ssh with private key
+4) Now in the id place please make sure of giving the same ID name in the both node so that they may work with HAproxy.
+
+
+5) Now copy the server-1  private key and paste here below field and click on create 
+
+
+
+6) Same above do the same process in sever-2 jenkins console and also make sure of the giving the same ID name of the both servers.
+
+7) Give the  private key here of the server-2 in the second server's jenkins console.  
+8) Follow the below steps when using aws as cloud...
+Now we need nfs 
+
+a) so we go to aws console and search for efs
+
+b) create  file systems
+
+c) Give filename as you like i'm giving as jenkins and set as regional
+ and click on creating
+ 
+d) After creating that efs and available then click on attach and copy the dns name
+e) Now go to both servers and install nfs-utilities 
+f) Now go to ec2 and check both servers' security groups and allow nfs there and come to efs and attach the same security group that nfs allowed on for the both servers .
+g) After that when you try to attach or  mount that point you will see the mount point cmd there copy it and execute on cli .
+to check the mount point execute the below cmd as df -h and you will see that mount point is attached to it.
+
+h)Stop the jenkins service while doing these
+ Now in the end of the mount point attached is var/lib/jenkins/jobs
+i) Now go to /var/lib/jenkins/ path and long list it with ls -lrth
+j) You will observe that the owner of the job directory is root and now we need to change the owner of that jobs directory to jenkins user with below mentioned cmd's 
+
+chown -R jenkins:jenkins /var/lib/jenkins/jobs 
+
+and  now execute ls -lrth and check ownership the jobs are also now owned by jenkins.
+
+k) After doing these changes now restart the jenkins service using systemctl start jenkins
+
+l) Now repeat the same steps from 4 to 11 in server-2 also. like mount the same point rand etc.
+
+
+

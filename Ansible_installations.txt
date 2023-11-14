@@ -1,0 +1,63 @@
+Ansible_installations
+
+Overview on Ansible
+? In one liner "Ansible is a super-simple automation platform that is agentless and extensible."
+? It is an open source tool (with enterprise editions available) developed using Python and runs on Windows, Mac, and UNIX-like systems.
+? Ansible is an orchestration engine in IT, which can be used for several use cases.
+? Compared to other automation tools, Ansible brings you an easy way to configure your orchestration engine without the overhead of a client or central server setup.
+? Another great feature is that Ansible is agentless.
+? It uses SSH, so we don't have to prepare and install something before we start.
+? It comes preloaded with a wide range of modules that make your life simpler.
+
+
+Master Node Configurations: - 
+
+Step1 : - Creating ansible user
+
+Create a user ansible and also add password to that user.
+
+Step2 : - edit sshd_config file
+
+Path : nano /etc/ssh/sshd_config
+
+Uncomment the below line 
+
+PasswordAuthentication yes
+
+Comment the below line
+#PermitEmptyPasswords no
+
+Step3 : - Edit the sudoers file
+
+Path : nano /etc/sudoers
+
+As we have created an earlier user as ansbileuser now we will add that user to sudoers file and give all privileges with password less.
+
+ansibleuser     ALL=(ALL) NOPASSWD: ALL
+
+
+
+Step4 : - generating Pub key to do ssh authentication
+
+a) Login to ansibleuser with "su ansibleuser"
+
+b) Check with any key is generated earlier with ls -la
+
+c) If no ssh key is generated earlier, then generate new key with
+"ssh-keygen" .
+d) Now check if the .ssh file is created or not with ls -la command .
+e) Now change the path to the .ssh file and copy the pub-key to the remote server using cmd ssh-copy-id username@hostip and with all the requirements like it will ask remote server password etc authenticate every thing and later the remote server will let you into it , then you can access remote server.
+
+Nodes/Remote server configurations : - 
+
+Repeat the steps -1,2,3 as done in master node configuration and make sure to install python on the remote server.
+
+
+https://www.golinuxcloud.com/ansible-tutorial/
+
+
+
+
+
+
+
