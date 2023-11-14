@@ -1,0 +1,164 @@
+Installing mysql server 8.0
+
+
+a) Download the repository using the below command:
+wget https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb
+
+b)Once downloaded, install the repository by running the command below:
+ sudo dpkg -i mysql-apt-config_0.8.22-1_all.deb
+ 
+Step 2: Update MySQL Repository 
+a) Run the below command to update your system packages index list
+      sudo apt update
+
+Step 3: Install MySQL 8.0 on Ubuntu 22.04 | 20.04
+
+Ubuntu 22.04:
+
+sudo apt install mysql-client mysql-server
+
+
+Ubuntu 20.04:
+
+
+Having found MySQL 8.0 in our system, we are going to install MySQL 8.0 client, MySQL 8.0 server with the below command:
+
+sudo apt install mysql-client mysql-community-server mysql-server
+
+Hit the y key to start the installation:
+
+Set a strong password for root MySQL user
+
+Confirm root password by typing it again.
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'LI7e3Uab4Mb56BqyLGet';
+
+Set default authentication plugin. Use a Strong Password Encryption mechanism.
+
+installing PHPmyadmin
+
+sudo apt install phpmyadmin
+
+Configure phpMyAdmin for Apache
+
+sudo cp /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
+
+Enable the configuration using a2enconf command.
+
+sudo a2enconf phpmyadmin
+
+
+sudo service apache2 restart
+
+
+when we get any error while installing packages go below command
+
+When we get any repository error like asking for the public then place public key 
+
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys <Add PUBKEY>
+
+Mysql config file
+
+/etc/mysql/mysqlconf.d/file
+default_authentication_plugin= mysql_native_password
+character_set_server = utf8
+sql_mode = ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_VALUE_ON_ZERO,NO_ENGINE_SUBSTITUTION
+
+
+
+
+Database corruption in MySQL Server, if not handled properly or resolved in time, can lead to major downtime and data loss.
+Unfortunately, you might not even notice that your MySQL server has turned corrupt, until the server accesses a corrupt table or the server is shutdown.
+What Causes Database Corruption in MySQL Server?
+Following are some of the common reasons behind MySQL Server Database Corruption:
+? Failure of server hardware.
+? MySQL process gets killed in the middle of writing to the disk.
+? Third-party software to access the database crashes unexpectedly.
+? Users trying to move database files manually in MySQL data directory (or datadir).
+? Bugs in MySQL server software.
+Besides these reasons, db corruption also depends on whether you're using MyISAM or InnoDB storage engine. That's because MyISAM tables are more susceptible to corruption.
+What to do When MySQL Database Gets Corrupt?
+Usually, when MySQL database corrupted, it is recommended that you restore it from the last known good backup copy. But if you don't have the backup, performing recovery operations can help fix MySQL database corruption.
+Even if backup is available, attempting recovery can be a better option as it takes less time in getting back the db online.
+Troubleshooting Steps to Resolve MySQL Database Corruption
+Try resolving database corruption by following steps in the sequence listed below:
+NOTE: These steps will work only if the MySQL database server is running. But, if MySQL service stops running (has crashed) and you cannot log into the MySQL command-line client, the only option left is to restore the database from a good known backup. If there is no backup, using a specialized MySQL repair software may help.
+Step 1 - Backup Your Database
+Before attempting to repair the corrupt database, make sure to back up your database files first.
+Although the db is already corrupt, backing it up will help minimize the risk of further damage, which may be caused due to a recovery operation.
+To back up all of the db files, follow these steps:
+? Stop the MySQL server.
+? Create a backup copy of your datadir. (cd/var/lib/mysql/)
+Step 2 - Bring Database Back in Recovery Mode
+NOTE: If MySQL Server uses MyISAM as the default storage engine, skip to Step 3 to know the process of repairing the corrupt db.
+If InnoDB is MySQL Server's default storage engine, in some cases of database corruption, merely dumping, dropping and re-creating one or a few corrupt tables will work for you. For this, use the CHECK TABLE statement to check the tables that are corrupt.
+Read this: How to Repair MySQL Database Table Without Downtime?
+If database corruption is severe, you will likely face trouble while starting your MySQL Server. In such a case, forcing InnoDB recovery may help start up MySQL.
+To use 'innodb_force_recovery' option, follow these steps:
+? Open MySQL configuration file and add the following line of code to [mysqld] section before restarting the server:
+NOTE: The innodb_force_recovery is set to '0' by default. However, to start InnoDB and dump MySQL tables, you will need to set the value to '1' and increase the value incrementally (from 1 to 6).
+But, keep in mind, setting the value of innodb_force_recovery option to 4 or greater increases the chances of data corruption.
+
+/etc/mysql/mysqlconf.d/file
+[mysqld]
+innodb_force_recovery=1
+? Save and close the MySQL configuration file, and then try restarting the MySQL service again.
+? If you're able to start MySQL, dump all of your MySQL databases to a single file by using the following command:
+mysqldump -u [user] -p[password] --all-databases > all_databases.sql
+NOTE: The dump file in this example is called all_databases.sql. But, you can change it to whatever you want.
+? Following this, disable InnoDB recovery mode. To do so, comment out the following line in the [mysqld] section:
+#innodb_force_recovery=...
+? Save the changes to the configuration file, and then start the MySQL server.
+? Restore the databases from the dump (backup file) that you have created in step 3:
+ mysql> source all_databases.sql
+Read about: Best Ways to Repair InnoDB Table Corruption in MySQL.
+Step 3 - Repair MyISAM Tables using myisamchk
+Run the myisamchk command to repair MyISAM tables by following these steps:
+NOTE: The myisamchk command does not work for the tables that use InnoDB engine.
+? Stop the MySQL server.
+? Use the following command to check corrupt tables:
+myisamchk TABLE
+? To check all of the tables in a corrupt database, type the following command:
+myisamchk *.MYI
+? Try repairing a corrupt table by executing the following command:
+myisamchk -recover TABLE
+? Start the MySQL server.
+
+To repair db running on InnoDB storage engine, follow these steps:
+1. Open MySQL configuration file "my.cnf". The location of the my.cnf file will vary depending on your Linux OS. On CentOS and Fedora, you can find the file in the '/etc' directory. And on Debian and Ubuntu, the configuration file is located in the '/etc/mysql' directory.
+2. Once you've located my.cnf file, find the [mysqld] section.
+3. In the [mysqld] section, add the following line:
+innodb_force_recovery=4
+
+
+
+
+[HOW TO] INCREASE IMPORT FILE SIZE IN PHPMYADMIN
+
+STEP 1: FIND PHP.INI FILE
+The first step to increase the import file size in PHPMyAdmin is to find the php.ini file. To do this, open a terminal window and type the following command:
+
+locate php.ini
+
+
+STEP 2: EDIT PHP.INI FILE
+
+vim /etc/php5/apache2/php.ini
+
+
+STEP 3: CHANGE VALUES
+Next, you need to change the values of the following variables in the php.ini file:
+
+post_max_size = 8M
+upload_max_filesize = 2M
+max_execution_time = 30
+max_input_time = 60
+memory_limit = 8M
+
+The specific values you use will depend on your own needs. It is recommended that you set the post_max_size and upload_max_filesize values to the same number to prevent any potential issues.
+
+STEP 4: RESTART APACHE
+
+Once you have changed the values in the php.ini file, you need to restart Apache for the changes to take effect. To do this, type the following command in a terminal window:
+
+service apache restart

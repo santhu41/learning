@@ -1,0 +1,70 @@
+Installing PHP on Ubuntu 20.04
+
+PHP installation on Ubuntu systems is pretty straightforward. You just need to add the required PPA and you can install any PHP version on the Ubuntu system.
+
+Follow these steps to complete PHP installation on Ubuntu:
+
+Install a few dependencies required by this tutorial with the below-mentioned command:
+sudo apt install software-properties-common ca-certificates lsb-release apt-transport-https 
+Add the Ondrej PPA to your system, which contains all versions of PHP packages for the Ubuntu systems.
+LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php 
+Now, update the Apt package manager cache.
+sudo apt update 
+The SURY repository contains PHP 8.1, 8.0, 7.4, 7.3, 7.2. 7.1, 7.0 & PHP 5.6. As the latest stable version of PHP is 8.0, but a large number of websites still required PHP 7. You can install any of the required PHP versions on your system.
+Install PHP 8.1:
+sudo apt install php8.1 
+Install PHP 7.4:
+sudo apt install php7.4 
+Install PHP 7.2:
+sudo apt install php7.2 
+
+Install PHP 5.6 (EOL):
+sudo apt install php5.6 
+Replace version 8.1, 7.4, 7.2, or 5.6 with the required PHP version to install on Ubuntu. Even you can install multiple PHP versions on a single Ubuntu system.
+
+Some applications required other PHP extensions, that can also be added using the below-mentioned syntax:
+sudo apt install php7.4-[extension]
+Replace [extension] with the extension you want to install, if you want to add multiple extensions then include them in braces, I am going to install "php-mbstring, php-mysql, php-xml, and php-curl" by running the below-mentioned command:
+
+sudo apt install php7.4-mysql php7.4-mbstring php7.4-xml php7.4-curl 
+Users have installed different PHP version, need to replace 7.4 with required PHP versions.
+
+Check Active PHP Version
+To view the current active PHP version run the following command:
+
+php -v
+Ouput:
+
+PHP 7.4.29 (cli) (built: Apr 21 2022 10:16:36) ( NTS )
+Copyright (c) The PHP Group
+Zend Engine v3.4.0, Copyright (c) Zend Technologies
+    with Zend OPcache v7.4.29, Copyright (c), by Zend Technologies
+Change Default PHP Version for CLI
+You can use the update-alternatives command to set the default PHP version. Use this tutorial to read more details about switching PHP version for CLI and Apache.
+
+sudo update-alternatives --config php
+There are 4 choices for the alternative php (providing /usr/bin/php).
+
+  Selection    Path             Priority   Status
+------------------------------------------------------------
+  0            /usr/bin/php8.1   81        auto mode
+  1            /usr/bin/php5.6   56        manual mode
+  2            /usr/bin/php7.2   72        manual mode
+* 3            /usr/bin/php7.4   74        manual mode
+  4            /usr/bin/php8.1   81        manual mode
+
+Press  to keep the current choice[*], or type selection number: 4
+The above output shows all the installed PHP versions on your system. Selection number 4 set PHP 8.1 as the default PHP version for the command line.
+
+
+Uninstall PHP
+If any PHP version is no more required, can be removed from the system. That will free the disk space as well as system security.
+
+To uninstall any PHP version just type:
+
+sudo apt remove php5.6 
+
+Also, uninstall all the modules for that version with the following command:
+
+sudo apt remove php5.6-* 
+
