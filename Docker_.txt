@@ -1,0 +1,254 @@
+Docker writable layer in images
+Initially when the image is pulled from docker hub repo  every change is stored temporarily means it will automatically be deleted when container restart means stopped and started ..
+TO overcome this we use volumes to store the configuration changes, any new creation etc.
+All the changes or configurations are stored temporarily due to this docker writable layer..
+
+######## Docker operations ###############
+
+ten useful commands that using docker..
+ 1) docker --version # to check docker version
+2) docker login # to login company managed repo (private_repo)
+3) docker logout
+4) docker search <image_name> # to search any image
+5) docker inspect image <image_name> # to search image information but after pull of that specific iamge only this cmd works.
+6) docker images or docker iamges ls # to check available images
+7) docker create <iamge_name> # to create container
+8) docker ps # this cmd shows only running containers
+9) docker ps -a # to check the available containers
+10) docker start <container_name or container_id> # to start the container
+11) docker stop <container_name or container_id> # to stop the container
+12) docker create --name <container> <name_as_you_like> # to create a container with customized containers
+13) docker run -d --name <name_as_you_like> <container>  # to create a customized container as you like and runs container and shows the process.
+Here d is detached mode automatically creates the container and logout without any manually interaction.
+
+14) docker kill <container_name> # when the container is unresponsive to kill the container forecfully
+
+15) docker exec -it <container_name> /bin/bash # to login container and exec in bin/bash terminal
+where it is interactive shell
+
+16) docker rm <container_name> # to delete the container
+
+17) docker rmi <container_name or image_id > # to delete the container with image.
+
+18) docker rename <old_container_name> <new_container_name> # to change the name of existing container 
+
+#################################### trouble shooting & restart policies in dockers ##################################
+
+no any additional configurations needed to check logs 
+docker logs <container_name> or <container_id> # to check the events that specific container or system
+docker exec -it <container_name> command # to exec the specific command in the container and will show the output in console.
+example : -
+docker exec -it <container_name> tail -f /var/log/example.log
+
+docker inspect <container_name> # check restart policy
+
+
+Docker provides restart policies that you can use to control the behavior of containers when they exit. These policies define what should happen to a container when it stops, either due to an error, manual intervention, or any other reason. Docker allows you to specify restart policies using the `--restart` flag when running containers. Here are the available restart policies:
+
+1. **no**: This is the default restart policy. Containers with this policy will not be automatically restarted, regardless of the reason for their exit.
+
+   Example:
+   ```bash
+   docker run --restart=no my-container
+   ```
+
+2. **always**: Containers with this policy will be automatically restarted when they exit, regardless of the exit status. This is useful for critical services that should always be running.
+
+   Example:
+   ```bash
+   docker run --restart=always my-container
+   ```
+
+3. **on-failure**: Containers with this policy will be automatically restarted only if they exit with a non-zero exit status. You can specify the maximum number of restart attempts using the `--restart-max` flag.
+
+   Example:
+   ```bash
+   docker run --restart=on-failure:5 my-container
+   ```
+
+   In this example, the container will be restarted up to 5 times if it exits with a non-zero status code.
+
+4. **unless-stopped**: Containers with this policy will be automatically restarted unless they are explicitly stopped by the user. It's useful for long-running services that you want to ensure are always running, but you want to allow manual intervention to stop them.
+
+   Example:
+   ```bash
+   docker run --restart=unless-stopped my-container
+   ```
+
+These restart policies help you define the desired behavior of your containers in different scenarios. Choose the most appropriate restart policy based on the requirements of your application or service.
+
+########################################################################
+
+
+Dockerfiles are used to create Docker images by specifying a series of instructions for building and configuring a containerized application or service. The choice of Dockerfile depends on the specific requirements of your application, but here are ten sample Dockerfiles for different use cases:
+
+1. **Node.js Application**:
+   ```Dockerfile
+   # Use an official Node.js runtime as the base image
+   FROM node:14
+
+   # Set the working directory
+   WORKDIR /app
+
+   # Copy package.json and package-lock.json to the container
+   COPY package*.json ./
+
+   # Install application dependencies
+   RUN npm install
+
+   # Copy the rest of the application code to the container
+   COPY . .
+
+   # Expose a port (e.g., 3000) that the application will listen on
+   EXPOSE 3000
+
+   # Define the command to run the application
+   CMD ["npm", "start"]
+2. **Python Flask Web Application**:
+   ```Dockerfile
+   # Use an official Python runtime as the base image
+   FROM python:3.8
+
+   # Set the working directory
+   WORKDIR /app
+
+   # Copy requirements.txt to the container
+   COPY requirements.txt .
+
+   # Install application dependencies
+   RUN pip install -r requirements.txt
+
+   # Copy the rest of the application code to the container
+   COPY . .
+
+   # Expose a port (e.g., 5000) that the application will listen on
+   EXPOSE 5000
+
+   # Define the command to run the application
+   CMD ["python", "app.py"]
+
+
+3. **Java Spring Boot Application**:
+   ```Dockerfile
+   # Use an official OpenJDK runtime as the base image
+   FROM openjdk:11
+
+   # Set the working directory
+   WORKDIR /app
+
+   # Copy the JAR file to the container
+   COPY target/my-app.jar .
+
+   # Expose a port (e.g., 8080) that the application will listen on
+   EXPOSE 8080
+
+   # Define the command to run the Spring Boot application
+   CMD ["java", "-jar", "my-app.jar"]
+   ```
+
+
+
+4. **Ruby on Rails Application**:
+   ```Dockerfile
+   # Use an official Ruby runtime as the base image
+   FROM ruby:2.7
+
+   # Set the working directory
+   WORKDIR /app
+
+   # Copy the Gemfile and Gemfile.lock to the container
+   COPY Gemfile Gemfile.lock ./
+
+   # Install gems
+   RUN bundle install
+
+   # Copy the rest of the application code to the container
+   COPY . .
+
+   # Expose a port (e.g., 3000) that the application will listen on
+   EXPOSE 3000
+
+   # Define the command to run the Rails application
+   CMD ["rails", "server", "-b", "0.0.0.0"]
+   ```
+
+5. **MySQL Database Server**:
+   ```Dockerfile
+   # Use an official MySQL image as the base image
+   FROM mysql:5.7
+
+   # Set environment variables (e.g., database name, user, and password)
+   ENV MYSQL_DATABASE=mydb \
+       MYSQL_USER=myuser \
+       MYSQL_PASSWORD=mypassword \
+       MYSQL_ROOT_PASSWORD=rootpassword
+
+   # Expose the MySQL port (3306)
+   EXPOSE 3306
+   ```
+
+
+
+
+
+
+6. **Nginx Web Server**:
+   ```Dockerfile
+   # Use an official Nginx image as the base image
+   FROM nginx:latest
+
+   # Copy custom configuration files (e.g., nginx.conf) to the container
+   COPY nginx.conf /etc/nginx/nginx.conf
+
+   # Expose the default Nginx port (80)
+   EXPOSE 80
+   ```
+
+7. **Elasticsearch Cluster Node**:
+   ```Dockerfile
+   # Use an official Elasticsearch image as the base image
+   FROM docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+
+   # Set Elasticsearch configuration (e.g., cluster.name, node.name)
+   ENV discovery.type=single-node
+
+   # Expose the Elasticsearch ports (9200 and 9300)
+   EXPOSE 9200 9300
+   ```
+
+8. **MongoDB Database Server**:
+   ```Dockerfile
+   # Use an official MongoDB image as the base image
+   FROM mongo:4.4
+
+   # Expose the MongoDB port (27017)
+   EXPOSE 27017
+   ```
+
+9. **Redis Key-Value Store**:
+   ```Dockerfile
+   # Use an official Redis image as the base image
+   FROM redis:latest
+
+   # Expose the Redis port (6379)
+   EXPOSE 6379
+
+
+
+
+10. **PostgreSQL Database Server**:
+    ```Dockerfile
+    # Use an official PostgreSQL image as the base image
+    FROM postgres:13
+
+    # Set environment variables (e.g., POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD)
+    ENV POSTGRES_DB=mydb \
+        POSTGRES_USER=myuser \
+        POSTGRES_PASSWORD=mypassword
+
+    # Expose the PostgreSQL port (5432)
+    EXPOSE 5432
+    ```
+
+These are just some sample Dockerfiles for different types of applications and services. You should customize these Dockerfiles according to your specific needs and application structure.
+

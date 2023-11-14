@@ -1,0 +1,252 @@
+
+APACHE SSL Configuration
+
+<VirtualHost _default_:443>
+        ServerName wfgcloudstgcls3.ceipal.com
+        ServerAlias www.wfgcloudstgcls3.ceipal.com
+        DocumentRoot /var/www/vhosts/staging/wfgcloudstgcls3.ceipal.com
+        <Directory /var/www/vhosts/staging/wfgcloudstgcls3.ceipal.com>
+                Options -Indexes +FollowSymLinks -MultiViews
+                AllowOverride All
+                Order deny,allow
+               Allow from all
+               Deny from all
+                Allow from 183.82.123.108
+                Allow from 202.65.140.75
+                Allow from 50.122.187.202
+                Allow from 50.122.187.203
+                Allow from 35.226.66.72
+                Allow from 104.197.210.132
+                Allow from 35.239.179.251
+                Allow from ceipal.com
+                Allow from google.com
+                Allow from stripe.com
+                Allow from 106.51.53.34 98.10.204.77
+                Allow from 70.106.193.211
+                Allow from office365.com
+                Allow from outlook.com
+                Allow from 183.83.130.43
+                Allow from 146.148.75.233
+                Allow from cloudconvert.com
+                Allow from 67.253.226.189
+                Allow from your-server.de
+                Allow from clients.your-server.de
+                Allow from 184.148.69.159
+                Allow from 103.197 119.235
+                Allow from 35.202.96.171
+                Allow from 172.101.174.218
+                Allow from thinternalapi.ceipal.com
+                Allow from sendgrid.net
+                Allow from fieldglass.net
+                Allow from beeline.com
+                Allow from iqnavigator.com
+                Allow from 27.116.20.24
+                Allow from 103.149.59.12
+                Allow from 157.48.194.96
+                Allow from 49.37.128.159
+                Allow from 110.235
+                Allow from 61.2.11.74
+                Allow from 103.44.12.202 192.168.205.75
+                #Kavya Home IP
+                Allow from 103.155.30.182 103.155.30 117.202.38.95
+
+        </Directory>
+
+rewrite rule for server-status to prevent 404 error
+##RewriteCond %{REQUEST_URI} !=/server-status
+
+       ProxyRequests Off
+       ProxyPreserveHost On
+       ProxyVia On
+      ProxyTimeout 1200
+
+#<Location /ceipal_adp_csr/testphp>
+ ProxyPass "http://127.0.0.1:8889/"
+ ProxyPassReverse "http://127.0.0.1:8889/"
+ ProxyPassReverseCookiePath /client /client
+ ProxyPassReverseCookieDomain localhost wfgcloudstgcls3.ceipal.com
+#</Location>
+
+
+        CustomLog /var/log/apache2/wfgcloudstgcls3.ceipal.com-ssl-access.log combined
+        ErrorLog /var/log/apache2/wfgcloudstgcls3.ceipal.com-ssl-error.log
+
+        # Possible values include: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel warn
+
+        SSLEngine on
+        SSLCertificateFile    /etc/ssl/certs/2020-ceipal.com.crt
+        SSLCertificateKeyFile /etc/ssl/private/2020-ceipal.com.key
+        SSLCACertificateFile /etc/ssl/certs/2020-ceipal.com.ca.crt
+
+
+        <FilesMatch \"\.(cgi|shtml|phtml|php)$\">
+                SSLOptions +StdEnvVars
+        </FilesMatch>
+
+        BrowserMatch \"MSIE [2-6]\" \
+                nokeepalive ssl-unclean-shutdown \
+                downgrade-1.0 force-response-1.0
+        BrowserMatch \"MSIE [17-9]\" ssl-unclean-shutdown
+</VirtualHost>
+
+
+NGINX SSL
+
+
+server {
+   listen 443 ssl;
+   listen [::]:443 ssl;
+
+    server_name attorney.ceipal.com;
+    ssl on;
+    ssl_certificate /etc/ssl/certs/2020-ceipal.com.bundle.crt;
+    ssl_certificate_key /etc/ssl/certs/2020-ceipal.com.key;
+    ssl_session_cache               shared:SSL:5m;
+    ssl_session_timeout             10m;
+    ssl_protocols                   TLSv1.2;
+    ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK:!SHA1:!DSS';
+    ssl_prefer_server_ciphers       on;
+    access_log /var/log/nginx/marketplacestg.ceipal.com-ssl-access.log;
+    error_log /var/log/nginx/marketplacestg.ceipal.com-ssl-error.log;
+
+    include /etc/nginx/mime.types;
+        root /var/www/build/leopard_solutions/wwwroot;
+        location /documents {
+        alias /var/www/build/leopard_solutions/wwwroot;
+        }
+
+        # Add index.php to the list if you are using PHP
+
+        index index.html index.htm index.nginx-debian.html;
+        server_name marketplacestg.ceipal.com;
+        location / {
+                # First attempt to serve request as file, then
+                # as directory, then fall back to displaying a 404.
+              try_files $uri $uri/ =404;
+                      proxy_pass http://127.0.0.1:5005;
+#                    proxy_pass_reverse / http://127.0.0.1:5001/;
+                    include /etc/nginx/sites-enabled/marketplace.conf;
+                      proxy_http_version 1.1;
+                      proxy_set_header Upgrade $http_upgrade;
+                      proxy_set_header Connection keep-alive;
+                      proxy_set_header Host $host;
+                      proxy_cache_bypass $http_upgrade;
+                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                      proxy_set_header X-Forwarded-Proto $scheme;
+                   }
+
+        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+        #
+        #location ~ \.php$ {
+        #       include snippets/fastcgi-php.conf;
+        #
+        #       # With php7.0-cgi alone:
+        #       fastcgi_pass 127.0.0.1:9000;
+        #       # With php7.0-fpm:
+        #       fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+        #}
+
+        # deny access to .htaccess files, if Apache's document root
+        # concurs with nginx's one
+        #
+        #location ~ /\.ht {
+        #       deny all;
+        #}
+
+}
+
+
+What is Cipher?
+Cipher is a frequently used algorithm in cryptology, a subject concerned with the study of cryptographic algorithms. It is a method of encrypting and decrypting data.
+
+a) The adoption of a symmetrical cipher will determine the secret or symmetric key encryption.
+b) The symmetric algorithm applies the same encryption key and cipher to the data in the same way.
+c) Symmetric ciphers are the foundation of symmetric key encryption, widely referred to as secret key encryption.
+d) The goal might be to transform plain text to ciphertext or vice versa.
+e) By transforming plaintext letters or other information into ciphertext, cyphers transform data. It is best to express the ciphertext as random information.
+f) The cipher analyses the original and plaintext data to generate ciphertext that seems to be random data.
+g) The same encryption key is applied to data, in the same way, using symmetric encryption methods, whether the goal is to convert plaintext to ciphertext or ciphertext to plaintext.
+Ciphers have traditionally employed two basic forms of transformation:
+
+a) Transposition ciphers maintain all of the original bits of data in a byte but reverse their order.
+b) Substitution ciphers substitute specified data sequences with alternative data sequences. For example, one type of replacement would be to convert all bits with a value of 1 to bits with a value of 0, and vice versa.
+The data generated by any method is known as the ciphertext.
+
+c) In many networking protocols like TLS, or transport layer security, which permits network traffic encryption, modern cipher techniques use private communication.
+d) Crypts are used by many communication technologies, including digital televisions, phones, and ATMs, to guarantee protection and confidentiality.
+
+
+
+My question is quite simply: how do I add both TLS 1.3 and TLS 1.2 suites in my nginx config?
+
+Like this?
+
+ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+
+ssl_prefer_server_ciphers on;
+
+ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256';
+
+ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384';
+
+How does a Cipher Work?
+
+An encryption technique is used by ciphers to convert plaintext, which is a legible communication, into ciphertext, which seems to be a random string of letters.
+
+a) In order to encrypt or decode bits in a stream, cyphers are sometimes called stream ciphers.
+b) Alternatively, they can use block ciphers, which process ciphertext in uniform blocks of a predetermined amount of bits.
+c) The encryption algorithm is used by modern cipher implementations along with a secret key to modify data while it is encrypted.
+d) Longer keys (measured in bits) make ciphers more resilient against brute-force attacks.
+e) The more brute-force attacks that must be used to uncover the plaintext, the longer the key.
+f) Although key length is not always correlated with cypher strength, experts advise that modern cyphers be built with keys of at least 128 bits or more, depending on the algorithm and use case.
+
+
+
+
+
+
+
+
+
+
+g) In real-world ciphering, the key is kept secret rather than the method because a key is such a crucial component of an encryption process.
+h) Strong encryption methods are designed such that, even if someone is familiar with the process, deciphering the ciphertext without the required key should be challenging.
+i) This means that in order for a cypher to work, both the sender and the receiver need to possess a key or set of keys.
+j) In symmetric key approaches, the same key is used for both data encryption and decryption.
+
+k) Asymmetric key algorithms use both public and private keys to encrypt and decrypt data.
+
+l) Utilizing enormous numbers that have been paired but are not equal, asymmetric encryption, also known as public key cryptography (asymmetric).
+
+An illustration of a key pair is shown below:
+
+? Everyone has access to the public key.
+? The private key, often known as the secret key, is kept confidential.
+? Either key can be used to encrypt a message; the opposite key used to encrypt the message is used to decode it.
+
+? When someone wishes to encrypt a message that can only be decoded by the author of the private key, they use the public key, although the author of the key pair utilizes the private or secret key to encryption or decryption of data.
+
+
+What is the Purpose of Ciphers?
+
+The most used ciphers for securing internet communication are symmetric ones. They are also incorporated into several data-sharing network protocols.
+
+For example, Secure Sockets Layer and TLS use ciphers to encrypt data at the application layer, especially when combined with HTTP Secure (HTTPS).
+
+Virtual private networks that link remote workers or branches to corporate networks use protocols using symmetric key techniques to secure data transmission.
+
+Symmetric cyphers are typically used in Wi-Fi networks, online banking and shopping, and mobile phone services to protect the privacy of user data.
+
+Several protocols employ asymmetric cryptography to authenticate and encrypt endpoints.
+
+The exchange of symmetric keys for the encryption of session data is likewise protected using it. These standards include the following:
+
+HTTP
+TLS
+Secure Shell
+Secure/Multipurpose Internet Mail Extensions
+Open Pretty Good Privacy
+Symmetric encryption is less safe than public key cryptography, but it also requires more computer power.
+

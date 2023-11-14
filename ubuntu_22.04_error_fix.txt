@@ -1,0 +1,36 @@
+
+
+
+
+Error_type : - 
+root@client-VirtualBox:/etc# dotnet --version
+A fatal error occurred. The folder [/usr/share/dotnet/host/fxr] does not exist
+
+Solution : - 
+
+sudo apt remove 'dotnet*'
+sudo apt remove 'aspnetcore*'
+sudo apt remove 'netstandard*'
+sudo rm /etc/apt/sources.list.d/microsoft-prod.list
+sudo apt update
+wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
+sudo touch /etc/apt/preferences
+sudo nano /etc/apt/preferences 
+
+Package: *
+Pin: origin "packages.microsoft.com"
+Pin-Priority: 1001
+
+sudo apt update -y 
+sudo apt install dotnet-sdk-6.0 -y 
+
+
+
+
+
+
+
+

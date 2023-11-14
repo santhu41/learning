@@ -1,0 +1,72 @@
+lsb_release -r -s
+
+20.04
+
+ -r, --release
+              Display the release number of the currently installed distribution
+ -s, --short
+              Use the short output format for any information displayed.  This format omits the leading header(s).
+
+To get ubuntu version using lsb command store the version in "ubuntu version"
+
+declare ubuntu_version=$(if command -v lsb_release &> /dev/null; then lsb_release -r -s; else grep -oP '(?<=^VERSION_ID=).+' /etc/os-release | tr -d '"'; fi)
+
+
+grep -oP
+
+'-o'
+'--only-matching'
+     Print only the matched (non-empty) parts of matching lines, with
+     each such part on a separate output line.  Output lines use the
+     same delimiters as input, and delimiters are null bytes if '-z'
+     ('--null-data') is also used (*Note Other Options::)
+	 
+	 
+'-P'
+'--perl-regexp'
+     Interpret patterns as Perl-compatible regular expressions (PCREs).
+     PCRE support is here to stay, but consider this option experimental
+     when combined with the '-z' ('--null-data') option, and note that
+     'grep -P' may warn of unimplemented features.  *Note Other
+     Options::
+
+
+]
+
+
+
+
+
+
+
+
+grep -oP '(?<=^VERSION_ID=).+' /etc/os-release | tr -d '"';
+ChatGPT
+The command you've provided is used in a Unix-like environment to extract the VERSION_ID value from the /etc/os-release file and remove any double quotes from it. Here's what each part of the command does:
+
+grep -oP '(?<=^VERSION_ID=).+' /etc/os-release: This part of the command uses grep with Perl-compatible regular expressions (-oP) to search for a pattern. The pattern (?<=^VERSION_ID=).+ looks for the text that follows VERSION_ID= at the beginning of a line (^). This extracts the value associated with VERSION_ID from the /etc/os-release file.
+
+tr -d '"': After extracting the value, this part of the command uses the tr (translate) command to delete (remove) any double quotes (") from the extracted value. This is useful because the value often includes double quotes, and you may want to remove them.
+
+So, when you run this command, it will output the value of VERSION_ID from the /etc/os-release file, without any double quotes if they are present. The result is a clean version number or identifier of your operating system.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
